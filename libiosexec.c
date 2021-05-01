@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "libiosexec.h"
 
 #define STRINGS_ARE_NOT_EQUAL(x, y, len) strncmp(x, y, len)
 
@@ -17,7 +18,7 @@ static inline int has_non_printable_char(char* str, size_t n) {
     return 0;
 } 
 
-int libiosexec_execve_shim(const char* path, char* const argv[], char* const envp[]) {
+int ie_execve_shim(const char* path, char* const argv[], char* const envp[]) {
     execve(path, argv, envp);
     int execve_ret = errno;
 
