@@ -1,3 +1,5 @@
+#include "utils.h"
+#include <sys/syslimits.h>
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
@@ -7,6 +9,8 @@
 #include "libiosexec.h"
 
 #define STRINGS_ARE_NOT_EQUAL(x, y, len) strncmp(x, y, len)
+
+extern char** environ;
 
 static inline int has_non_printable_char(char* str, size_t n) {
     for (int i = 0; i < n; i++) {
@@ -18,7 +22,7 @@ static inline int has_non_printable_char(char* str, size_t n) {
     return 0;
 } 
 
-int ie_execve_shim(const char* path, char* const argv[], char* const envp[]) {
+int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     execve(path, argv, envp);
     int execve_ret = errno;
 
@@ -82,4 +86,59 @@ int ie_execve_shim(const char* path, char* const argv[], char* const envp[]) {
     int ret = execve(interp, argv_new, envp);
     free(freeme);
     return ret;
+}
+
+int ie_execv(const char *path, char *const argv[]) {
+    return ie_execve(path, argv, environ);
+}
+
+int ie_execvpe(const char *file, char *const argv[], char *const envp[])
+{
+	const char *p, *z, *path = getenv("PATH");
+	size_t l, k;
+	int seen_eacces = 0;
+
+	errno = ENOENT;
+	if (!*file) return -1;
+
+	if (strchr(file, '/'))
+		return ie_execve(file, argv, envp);
+
+	if (!path) path = "/usr/local/bin:/bin:/usr/bin";
+	k = strnlen(file, NAME_MAX+1);
+	if (k > NAME_MAX) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+	l = strnlen(path, PATH_MAX-1)+1;
+
+	for(p=path; ; p=z) {
+		char b[l+k+1];
+		z = __strchrnul(p, ':');
+		if (z-p >= l) {
+			if (!*z++) break;
+			continue;
+		}
+		memcpy(b, p, z-p);
+		b[z-p] = '/';
+		memcpy(b+(z-p)+(z>p), file, k+1);
+		ie_execve(b, argv, envp);
+		switch (errno) {
+		case EACCES:
+			seen_eacces = 1;
+		case ENOENT:
+		case ENOTDIR:
+			break;
+		default:
+			return -1;
+		}
+		if (!*z++) break;
+	}
+	if (seen_eacces) errno = EACCES;
+	return -1;
+}
+
+int ie_execvp(const char *file, char *const argv[])
+{
+	return ie_execvpe(file, argv, environ);
 }
