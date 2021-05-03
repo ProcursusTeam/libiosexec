@@ -78,7 +78,9 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     size_t argcount = 0;
     while(argv[argcount]) argcount++;
 
-    for (int i = 0; i < argcount; i++) {
+    argv_new[1 + offset] = path;
+
+    for (int i = 1; i < argcount; i++) {
         argv_new[offset + i + 1] = argv[i];
     }
     argv_new[offset + argcount + 1] = NULL;
