@@ -104,7 +104,7 @@ int ie_execvpe(const char *file, char *const argv[], char *const envp[])
 	if (strchr(file, '/'))
 		return ie_execve(file, argv, envp);
 
-	if (!path) path = "/usr/local/bin:/bin:/usr/bin";
+	if (!path) path = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11:/usr/games";
 	k = strnlen(file, NAME_MAX+1);
 	if (k > NAME_MAX) {
 		errno = ENAMETOOLONG;
