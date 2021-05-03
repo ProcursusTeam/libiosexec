@@ -1,2 +1,2 @@
 all:
-	$(CC) $(wildcard *.c) $(CFLAGS) -shared -o libioexec.dylib
+	$(CC) $(wildcard *.c) $(CFLAGS) -shared -o libiosexec.dylib
