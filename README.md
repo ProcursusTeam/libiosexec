@@ -2,6 +2,7 @@
 
 ### define the symbols:
 ```
+#include <libiosexec.h>
 #define execl ie_execl
 #define execle ie_execle
 #define execlp ie_execlp
