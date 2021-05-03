@@ -3,4 +3,4 @@ all:
 
 static:
 	$(CC) $(wildcard *.c) $(CFLAGS) -c
-	libtool -static -o libiosexec.a $(wildcard *.o)
+	libtool -static -o libiosexec.a *.o
