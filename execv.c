@@ -27,7 +27,7 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     execve(path, argv, envp);
     int execve_ret = errno;
 
-    if (execve_ret != EPERM) {
+    if (execve_ret != EPERM && execve_ret != ENOEXEC) {
         return -1;
     }
 
@@ -91,10 +91,6 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
         argv_new[offset + i + 1] = argv[i];
     }
     argv_new[offset + argcount + 1] = NULL;
-
-    printf("%s",argv_new[0]);
-    printf("%s",argv_new[1]);
-    printf("%s",argv_new[2]);
 
     int ret = execve(argv_new[0], argv_new, envp);
     free(freeme);
