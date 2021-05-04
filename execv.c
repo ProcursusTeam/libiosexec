@@ -31,12 +31,11 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
         for (argc = 0; argv[argc] != NULL; argc++);
         const char *newargv[argc+4];
         newargv[0] = "/bin/sh";
-        newargv[1] = "-c";
-        newargv[2] = "exec \"$0\" \"$@\"";
-        for (int i = 0; i<argc; i++) {
-            newargv[i+3] = argv[i];
+        newargv[1] = path;
+        for (int i = 1; i<argc; i++) {
+            newargv[i+2] = argv[i];
         }
-        newargv[argc+3] = NULL;
+        newargv[argc+2] = NULL;
         return execve(newargv[0], (char * const *)newargv, envp);
     }
 
