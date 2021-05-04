@@ -63,8 +63,6 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     char* argv_new[1024];
     int offset = 0;
     char* freeme = first_line;
-    char* interp;
-    char* arg_to_interpreter;
 
     if (hasBang) {
         // Remove the shebang from the line, for parsing. 
@@ -74,15 +72,14 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
         char* token = strtok_r(first_line, " ", &state);
         char* interp = token;
         char* arg_to_interpreter = strtok_r(NULL, "", &state);
+        
+        argv_new[0] = interp;
+        if (arg_to_interpreter != NULL) {
+            argv_new[1] = arg_to_interpreter;
+            offset++;
+        }
     } else {
-        char* interp = "/bin/sh";
-        char* arg_to_interpreter = NULL;
-    }
-
-    argv_new[0] = interp;
-    if (arg_to_interpreter != NULL) {
-        argv_new[1] = arg_to_interpreter;
-        offset++;
+        argv_new[0] = "/bin/sh";
     }
 
     size_t argcount = 0;
@@ -95,7 +92,7 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     }
     argv_new[offset + argcount + 1] = NULL;
 
-    int ret = execve(interp, argv_new, envp);
+    int ret = execve(argv_new[0], argv_new, envp);
     free(freeme);
     return ret;
 }

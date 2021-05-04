@@ -18,19 +18,21 @@ int ie_execvp(const char* file, char* const argv[]);
 int ie_execvpe(const char* file, char* const argv[], char* const envp[]);
 int ie_execve(const char* path, char* const argv[], char* const envp[]); 
 
-#define execl ie_execl
-#define execle ie_execle
-#define execlp ie_execlp
-#define execv ie_execv
-#define execvp ie_execvp
-#define execvpe ie_execvpe
-#define execve ie_execve
+#ifndef LIBIOSEXEC_INTERNAL
+    #define execl ie_execl
+    #define execle ie_execle
+    #define execlp ie_execlp
+    #define execv ie_execv
+    #define execvp ie_execvp
+    #define execvpe ie_execvpe
+    #define execve ie_execve
+#endif
   
 #ifdef __cplusplus
 }
 #endif // __cplusplus
 
-#endif // TARGET_IS_IPHONE
+#endif // TARGET_OS_IPHONE
 #endif // __APPLE__
 
 #endif // LIBIOSEXEC_H
