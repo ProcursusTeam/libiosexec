@@ -6,3 +6,13 @@ int ie_execv(const char* path, char *const argv[]);
 int ie_execvp(const char* file, char* const argv[]);
 int ie_execvpe(const char* file, char* const argv[], char* const envp[]);
 int ie_execve(const char* path, char* const argv[], char* const envp[]); 
+
+#ifdef ENABLE_IOSEXEC
+  #define execl ie_execl
+  #define execle ie_execle
+  #define execlp ie_execlp
+  #define execv ie_execv
+  #define execvp ie_execvp
+  #define execvpe ie_execvpe
+  #define execve ie_execve
+#endif
