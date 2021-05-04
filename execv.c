@@ -37,7 +37,7 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
             newargv[i+3] = argv[i];
         }
         newargv[argc+3] = NULL;
-        return execve(newargv[0], (char * const *)newargv, environ);
+        return execve(newargv[0], (char * const *)newargv, envp);
     }
 
     if (execve_ret != EPERM) {
