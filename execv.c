@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -25,19 +26,6 @@ static inline int has_non_printable_char(char* str, size_t n) {
 int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     execve(path, argv, envp);
     int execve_ret = errno;
-	
-    if (execve_ret == ENOEXEC) {
-        int argc;
-        for (argc = 0; argv[argc] != NULL; argc++);
-        const char *newargv[argc+4];
-        newargv[0] = "/bin/sh";
-        newargv[1] = path;
-        for (int i = 1; i<argc; i++) {
-            newargv[i+2] = argv[i];
-        }
-        newargv[argc+2] = NULL;
-        return execve(newargv[0], (char * const *)newargv, envp);
-    }
 
     if (execve_ret != EPERM) {
         return -1;
@@ -62,25 +50,34 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     first_line[first_line_len - 1] = '\0';
     first_line_len--;
 
-    if (STRINGS_ARE_NOT_EQUAL("#!", first_line, 2)) {
-        return -1;
-    }
-
     if (has_non_printable_char(first_line, first_line_len)) {
         return -1;
     }
 
-    // Remove the shebang from the line, for parsing. 
-    char* freeme = first_line;
-    first_line += 2;
-    
-    char* state;
-    char* token = strtok_r(first_line, " ", &state);
-    char* interp = token;
-    char* arg_to_interpreter = strtok_r(NULL, "", &state);
+    bool hasBang = 1;
+
+    if (STRINGS_ARE_NOT_EQUAL("#!", first_line, 2)) {
+        hasBang = 0;
+    }
 
     char* argv_new[1024];
-    int offset = 0; 
+    int offset = 0;
+    char* freeme = first_line;
+    char* interp;
+    char* arg_to_interpreter;
+
+    if (hasBang) {
+        // Remove the shebang from the line, for parsing. 
+        first_line += 2;
+        
+        char* state;
+        char* token = strtok_r(first_line, " ", &state);
+        char* interp = token;
+        char* arg_to_interpreter = strtok_r(NULL, "", &state);
+    } else {
+        char* interp = "/bin/sh";
+        char* arg_to_interpreter = NULL;
+    }
 
     argv_new[0] = interp;
     if (arg_to_interpreter != NULL) {
