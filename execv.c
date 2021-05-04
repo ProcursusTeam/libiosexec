@@ -25,6 +25,20 @@ static inline int has_non_printable_char(char* str, size_t n) {
 int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     execve(path, argv, envp);
     int execve_ret = errno;
+	
+    if (execve_ret == ENOEXEC) {
+        int argc;
+        for (argc = 0; argv[argc] != NULL; argc++);
+        const char *newargv[argc+4];
+        newargv[0] = "/bin/sh";
+        newargv[1] = "-c";
+        newargv[2] = "exec \"$0\" \"$@\"";
+        for (int i = 0; i<argc; i++) {
+            newargv[i+3] = argv[i];
+        }
+        newargv[argc+3] = NULL;
+        return execve(newargv[0], (char * const *)newargv, environ);
+    }
 
     if (execve_ret != EPERM) {
         return -1;
