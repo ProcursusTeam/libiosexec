@@ -27,16 +27,8 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     int execve_ret = errno;
 	
     if (execve_ret == ENOEXEC) {
-        int argc;
-        for (argc = 0; argv[argc] != NULL; argc++);
-        const char *newargv[argc+4];
-        newargv[0] = "/bin/sh";
-        newargv[1] = path;
-        for (int i = 1; i<argc; i++) {
-            newargv[i+2] = argv[i];
-        }
-        newargv[argc+2] = NULL;
-        return execve(newargv[0], (char * const *)newargv, envp);
+        argv[-1] = "sh";
+        return execve("/bin/sh", argv - 1, envp);
     }
 
     if (execve_ret != EPERM) {
