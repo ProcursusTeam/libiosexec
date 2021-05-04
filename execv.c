@@ -92,6 +92,10 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     }
     argv_new[offset + argcount + 1] = NULL;
 
+    printf("%s",argv_new[0]);
+    printf("%s",argv_new[1]);
+    printf("%s",argv_new[2]);
+
     int ret = execve(argv_new[0], argv_new, envp);
     free(freeme);
     return ret;
