@@ -1,5 +1,9 @@
 #include "utils.h"
+#if defined (__APPLE__)
 #include <sys/syslimits.h>
+#elif defined __linux__
+#include <linux/limits.h>
+#endif
 #include <ctype.h>
 #include <string.h>
 #include <errno.h>
