@@ -1,3 +1,10 @@
+#ifndef LIBIOSEXEC_H
+#define LIBIOSEXEC_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 int ie_execl(const char* path, const char* arg0, ...);
 int ie_execle(const char* path, const char* arg0, ...);
 int ie_execlp(const char* file, const char* arg0, ...);
@@ -15,4 +22,10 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]);
   #define execvp ie_execvp
   #define execvpe ie_execvpe
   #define execve ie_execve
-#endif
+#endif // ENABLE_IOSEXEC
+  
+#ifdef __cplusplus
+}
+#endif // __cplusplus
+
+#endif // LIBIOSEXEC_H
