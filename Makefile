@@ -5,4 +5,4 @@ all:
 
 static:
 	$(CC) $(wildcard *.c) $(CFLAGS) -c
-	libtool -static -o libiosexec.a *.o
+	$(AR) cru libiosexec.a *.o
