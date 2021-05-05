@@ -50,6 +50,12 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
 
     size_t first_line_len = strlen(first_line);
 
+    // If the line has a CRLF terminator, just move the length back by one and let the code
+    // below cut both off.
+    if (first_line[first_line_len - 2] == '\r') {
+        first_line_len--;
+    }
+
     // Strip the newline off the end of the string.
     first_line[first_line_len - 1] = '\0';
     first_line_len--;
