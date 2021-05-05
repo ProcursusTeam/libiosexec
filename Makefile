@@ -6,3 +6,4 @@ all:
 static:
 	$(CC) $(wildcard *.c) $(CFLAGS) -c
 	$(AR) cru libiosexec.a *.o
+	$(RANLIB) libiosexec.a
