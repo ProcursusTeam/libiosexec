@@ -13,6 +13,7 @@ libiosexec.a: $(SRC:%.c=%.o)
 
 install: all
 	$(GINSTALL) -Dm644 libiosexec.$(SOVER).dylib $(DESTDIR)$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib/libiosexec.$(SOVER).dylib
+	$(LN) -sf libiosexec.$(SOVER).dylib $(DESTDIR)$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib/libiosexec.dylib
 	$(GINSTALL) -Dm644 libiosexec.a $(DESTDIR)$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib/libiosexec.a
 	$(GINSTALL) -Dm644 libiosexec.h $(DESTDIR)$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/include/libiosexec.h
 
