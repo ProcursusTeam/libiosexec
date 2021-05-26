@@ -1,18 +1,21 @@
 #ifndef LIBIOSEXEC_H
 #define LIBIOSEXEC_H
 
+#define IOSEXEC_PUBLIC __attribute__ ((visibility ("default")))
+#define IOSEXEC_HIDDEN __attribute__ ((visibility ("hidden")))
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
 
-int ie_execl(const char* path, const char* arg0, ...);
-int ie_execle(const char* path, const char* arg0, ...);
-int ie_execlp(const char* file, const char* arg0, ...);
+IOSEXEC_PUBLIC int ie_execl(const char* path, const char* arg0, ...);
+IOSEXEC_PUBLIC int ie_execle(const char* path, const char* arg0, ...);
+IOSEXEC_PUBLIC int ie_execlp(const char* file, const char* arg0, ...);
 
-int ie_execv(const char* path, char *const argv[]);
-int ie_execvp(const char* file, char* const argv[]);
-int ie_execvpe(const char* file, char* const argv[], char* const envp[]);
-int ie_execve(const char* path, char* const argv[], char* const envp[]); 
+IOSEXEC_PUBLIC int ie_execv(const char* path, char *const argv[]);
+IOSEXEC_PUBLIC int ie_execvp(const char* file, char* const argv[]);
+IOSEXEC_PUBLIC int ie_execvpe(const char* file, char* const argv[], char* const envp[]);
+IOSEXEC_PUBLIC int ie_execve(const char* path, char* const argv[], char* const envp[]); 
 
 #if defined(__APPLE__)
 #  include <TargetConditionals.h>
