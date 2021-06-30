@@ -9,7 +9,7 @@ MEMO_SUB_PREFIX ?= /usr
 
 SOVER := 1
 
-SRC := execl.c execv.c utils.c
+SRC := execl.c execv.c utils.c get_new_argv.c
 
 all: libiosexec.$(SOVER).dylib libiosexec.a
 

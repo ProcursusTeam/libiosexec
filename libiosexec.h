@@ -17,6 +17,10 @@ IOSEXEC_PUBLIC int ie_execvp(const char* file, char* const argv[]);
 IOSEXEC_PUBLIC int ie_execvpe(const char* file, char* const argv[], char* const envp[]);
 IOSEXEC_PUBLIC int ie_execve(const char* path, char* const argv[], char* const envp[]); 
 
+#ifdef LIBIOSEXEC_INTERNAL
+IOSEXEC_HIDDEN char** get_new_argv(const char* path, char* const argv[]);
+#endif // LIBIOSEXEC_INTERNAL
+
 #if defined(__APPLE__)
 #  include <TargetConditionals.h>
 #  if TARGET_OS_IPHONE
