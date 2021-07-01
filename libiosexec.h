@@ -32,6 +32,8 @@ IOSEXEC_HIDDEN char** get_new_argv(const char* path, char* const argv[]);
 #      define execvp ie_execvp
 #      define execvpe ie_execvpe
 #      define execve ie_execve
+#      define posix_spawn ie_posix_spawn
+#      define posix_spawnp ie_posix_spawnp
 #    endif // LIBIOSEXEC_INTERNAL
 #  endif // TARGET_OS_IPHONE
 #endif // __APPLE__
