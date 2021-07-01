@@ -17,16 +17,6 @@
 
 extern char** environ;
 
-static inline int has_non_printable_char(char* str, size_t n) {
-    for (int i = 0; i < n; i++) {
-        if (!isprint(str[i])) {
-                return 1;
-        }
-    }
-
-    return 0;
-} 
-
 int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     execve(path, argv, envp);
     int execve_ret = errno;
