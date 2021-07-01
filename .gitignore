@@ -1,3 +1,4 @@
 *.o
 *.dylib
 *.a
+tests/test
