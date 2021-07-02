@@ -1,5 +1,5 @@
 # libiosexec
-An execv shim that allows executing shell scripts with elevated privilages on iOS.
+An execv shim that allows executing shell scripts on iOS.
 
 ## Installation
 A build of ``libiosexec`` is provided on [Procursus](https://github.com/ProcursusTeam/Procursus), which you can install if your device is already setup with the build system.
