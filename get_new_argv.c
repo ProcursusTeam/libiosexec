@@ -1,3 +1,4 @@
+#include <errno.h>
 #include "utils.h"
 #include <ctype.h>
 #include <string.h>

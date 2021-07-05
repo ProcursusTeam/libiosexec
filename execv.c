@@ -32,7 +32,9 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     }
 
     int ret = execve(argv_new[0], argv_new, envp);
+    int saved_errno = errno;
     free_new_argv(argv_new);
+    errno = saved_errno;
     return ret;
 }
 
