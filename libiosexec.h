@@ -26,6 +26,8 @@ IOSEXEC_HIDDEN char** get_new_argv(const char* path, char* const argv[]);
 IOSEXEC_HIDDEN void free_new_argv(char** argv);
 // PATH_MAX for Darwin
 #define PATH_MAX 1024
+#define DEFAULT_PATH "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11:/usr/games";
+#define DEFAULT_SHELL "/bin/sh"
 #endif // LIBIOSEXEC_INTERNAL
 
 #if defined(__APPLE__)
