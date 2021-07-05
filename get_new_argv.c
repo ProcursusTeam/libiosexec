@@ -77,25 +77,33 @@ char** get_new_argv(const char* path, char* const argv[]) {
         char* interp = token;
         char* arg_to_interpreter = strtok_r(NULL, "", &state);
 
-        argv_new[0] = interp;
+        argv_new[0] = strdup(interp);
         if (arg_to_interpreter != NULL) {
-            argv_new[1] = arg_to_interpreter;
+            argv_new[1] = strdup(arg_to_interpreter);
             offset++;
         }
     } else {
-        argv_new[0] = "/bin/sh";
+        argv_new[0] = strdup("/bin/sh");
     }
 
     size_t argcount = 0;
     while(argv[argcount]) argcount++;
 
-    argv_new[1 + offset] = (char *)path;
+    argv_new[1 + offset] = strdup(path);
 
     for (int i = 1; i < argcount; i++) {
-        argv_new[offset + i + 1] = argv[i];
+        argv_new[offset + i + 1] = strdup(argv[i]);
     }
     argv_new[offset + argcount + 1] = NULL;
 
     free(freeme);
     return argv_new;
+}
+
+void free_new_argv(char** argv) {
+    for(int i = 0; argv[i] != NULL; i++) {
+        free(argv[i]);
+    }
+
+    free(argv);
 }
