@@ -10,15 +10,14 @@ int ie_posix_spawn(pid_t *pid, const char *path,
                        const posix_spawnattr_t *attrp,
                        char *const argv[],
                        char *const envp[]) {
-   posix_spawn(pid, path, file_actions, attrp, argv, envp);
-   int err = errno;
+   int err = posix_spawn(pid, path, file_actions, attrp, argv, envp);
    if (err != EPERM && err != ENOEXEC) {
-       return -1;
+       return err;
    }
 
    char** new_args = get_new_argv(path, argv);
    if (new_args == NULL) {
-       return -1;
+       return errno;
    }
 
    int ret = posix_spawn(pid, new_args[0], file_actions, attrp, new_args, envp);

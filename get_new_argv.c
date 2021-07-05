@@ -25,11 +25,13 @@ char** get_new_argv(const char* path, char* const argv[]) {
 
     FILE* ptr = fopen(path, "r");
     if (!ptr) {
+        errno = ENOENT;
         return NULL;
     }
 
-    // If the line cannot be retrieved/is empty return the errno value/ENOEXEC
+    // If the line cannot be retrieved/is empty set errno to ENOEXEC
     if (getline(&first_line, &read_amount, ptr) == 0) {
+        errno = ENOEXEC;
         return NULL;
     }
 
@@ -46,6 +48,7 @@ char** get_new_argv(const char* path, char* const argv[]) {
     first_line_len--;
 
     if (has_non_printable_char(first_line, first_line_len)) {
+        errno = ENOEXEC;
         return NULL;
     }
 
@@ -57,6 +60,7 @@ char** get_new_argv(const char* path, char* const argv[]) {
 
     char** argv_new = calloc(1024, 1);
     if (!argv_new) {
+        errno = ENOMEM;
         return NULL;
     }
 
