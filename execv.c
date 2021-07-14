@@ -102,7 +102,7 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     }
     argv_new[offset + argcount + 1] = NULL;
 
-    int ret = execve(argv_new[0], argv_new, envp);
+    int ret = ie_execve(argv_new[0], argv_new, envp);
     free(freeme);
     return ret;
 }
