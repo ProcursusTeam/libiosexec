@@ -12,20 +12,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "libiosexec.h"
+#include <sys/uio.h>
 
 #define STRINGS_ARE_NOT_EQUAL(x, y, len) strncmp(x, y, len)
 
 extern char** environ;
-
-static inline int has_non_printable_char(char* str, size_t n) {
-    for (int i = 0; i < n; i++) {
-        if (!isprint(str[i])) {
-                return 1;
-        }
-    }
-
-    return 0;
-} 
 
 int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     execve(path, argv, envp);
@@ -35,75 +26,15 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
         return -1;
     }
 
-    char* first_line = NULL;
-    size_t read_amount = 0;
-    
-    FILE* ptr = fopen(path, "r");
-    if (!ptr) {
+    char** argv_new = get_new_argv(path, argv);
+    if (argv_new == NULL) {
         return -1;
     }
-
-    // If the line cannot be retrieved/is empty return the errno value/ENOEXEC
-    if (getline(&first_line, &read_amount, ptr) == 0) {
-        return -1;
-    }
-
-    size_t first_line_len = strlen(first_line);
-
-    // If the line has a CRLF terminator, just move the length back by one and let the code
-    // below cut both off.
-    if (first_line[first_line_len - 2] == '\r') {
-        first_line_len--;
-    }
-
-    // Strip the newline off the end of the string.
-    first_line[first_line_len - 1] = '\0';
-    first_line_len--;
-
-    if (has_non_printable_char(first_line, first_line_len)) {
-        return -1;
-    }
-
-    bool hasBang = 1;
-
-    if (STRINGS_ARE_NOT_EQUAL("#!", first_line, 2)) {
-        hasBang = 0;
-    }
-
-    char* argv_new[1024];
-    int offset = 0;
-    char* freeme = first_line;
-
-    if (hasBang) {
-        // Remove the shebang from the line, for parsing. 
-        first_line += 2;
-        
-        char* state;
-        char* token = strtok_r(first_line, " ", &state);
-        char* interp = token;
-        char* arg_to_interpreter = strtok_r(NULL, "", &state);
-        
-        argv_new[0] = interp;
-        if (arg_to_interpreter != NULL) {
-            argv_new[1] = arg_to_interpreter;
-            offset++;
-        }
-    } else {
-        argv_new[0] = "/bin/sh";
-    }
-
-    size_t argcount = 0;
-    while(argv[argcount]) argcount++;
-
-    argv_new[1 + offset] = (char *)path;
-
-    for (int i = 1; i < argcount; i++) {
-        argv_new[offset + i + 1] = argv[i];
-    }
-    argv_new[offset + argcount + 1] = NULL;
 
     int ret = ie_execve(argv_new[0], argv_new, envp);
-    free(freeme);
+    int saved_errno = errno;
+    free_new_argv(argv_new);
+    errno = saved_errno;
     return ret;
 }
 
@@ -111,50 +42,117 @@ int ie_execv(const char *path, char *const argv[]) {
     return ie_execve(path, argv, environ);
 }
 
-int ie_execvpe(const char *file, char *const argv[], char *const envp[])
-{
-	const char *p, *z, *path = getenv("PATH");
-	size_t l, k;
-	int seen_eacces = 0;
+int ie_execvpe(const char *name, char *const *argv, char *const *envp) {
+	char **memp;
+	int cnt;
+	size_t lp, ln, len;
+	char *p;
+	int eacces = 0;
+	char *bp, *cur, *path, buf[PATH_MAX];
 
-	errno = ENOENT;
-	if (!*file) return -1;
+	/*
+	 * Do not allow null name
+	 */
+	if (name == NULL || *name == '\0') {
+		errno = ENOENT;
+		return (-1);
+ 	}
 
-	if (strchr(file, '/'))
-		return ie_execve(file, argv, envp);
-
-	if (!path) path = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11:/usr/games";
-	k = strnlen(file, NAME_MAX+1);
-	if (k > NAME_MAX) {
-		errno = ENAMETOOLONG;
-		return -1;
+	/* If it's an absolute or relative path name, it's easy. */
+	if (strchr(name, '/')) {
+		bp = (char *)name;
+		cur = path = NULL;
+		goto retry;
 	}
-	l = strnlen(path, PATH_MAX-1)+1;
+	bp = buf;
 
-	for(p=path; ; p=z) {
-		char b[l+k+1];
-		z = __strchrnul(p, ':');
-		if (z-p >= l) {
-			if (!*z++) break;
+	/* Get the path we're searching. */
+	if (!(path = getenv("PATH")))
+		path = DEFAULT_PATH;
+	len = strlen(path) + 1;
+	cur = alloca(len);
+	if (cur == NULL) {
+		errno = ENOMEM;
+		return (-1);
+	}
+	strlcpy(cur, path, len);
+	path = cur;
+	while ((p = strsep(&cur, ":"))) {
+		/*
+		 * It's a SHELL path -- double, leading and trailing colons
+		 * mean the current directory.
+		 */
+		if (!*p) {
+			p = ".";
+			lp = 1;
+		} else
+			lp = strlen(p);
+		ln = strlen(name);
+
+		/*
+		 * If the path is too long complain.  This is a possible
+		 * security issue; given a way to make the path too long
+		 * the user may execute the wrong program.
+		 */
+		if (lp + ln + 2 > sizeof(buf)) {
+			struct iovec iov[3];
+
+			iov[0].iov_base = "execvp: ";
+			iov[0].iov_len = 8;
+			iov[1].iov_base = p;
+			iov[1].iov_len = lp;
+			iov[2].iov_base = ": path too long\n";
+			iov[2].iov_len = 16;
+			(void)writev(STDERR_FILENO, iov, 3);
 			continue;
 		}
-		memcpy(b, p, z-p);
-		b[z-p] = '/';
-		memcpy(b+(z-p)+(z>p), file, k+1);
-		ie_execve(b, argv, envp);
-		switch (errno) {
-		case EACCES:
-			seen_eacces = 1;
+		bcopy(p, buf, lp);
+		buf[lp] = '/';
+		bcopy(name, buf + lp + 1, ln);
+		buf[lp + ln + 1] = '\0';
+
+retry:		(void)ie_execve(bp, argv, envp);
+		switch(errno) {
+		case E2BIG:
+			goto done;
+		case EISDIR:
+		case ELOOP:
+		case ENAMETOOLONG:
 		case ENOENT:
+			break;
+		case ENOEXEC:
+			for (cnt = 0; argv[cnt]; ++cnt)
+				;
+			memp = alloca((cnt + 2) * sizeof(char *));
+			if (memp == NULL)
+				goto done;
+			memp[0] = "sh";
+			memp[1] = bp;
+			bcopy(argv + 1, memp + 2, cnt * sizeof(char *));
+			(void)ie_execve(DEFAULT_SHELL, memp, envp);
+			goto done;
+		case ENOMEM:
+			goto done;
 		case ENOTDIR:
 			break;
+		case ETXTBSY:
+			/*
+			 * We used to retry here, but sh(1) doesn't.
+			 */
+			goto done;
+		case EACCES:
+			eacces = 1;
+			break;
 		default:
-			return -1;
+			goto done;
 		}
-		if (!*z++) break;
 	}
-	if (seen_eacces) errno = EACCES;
-	return -1;
+	if (eacces)
+		errno = EACCES;
+	else if (!errno)
+		errno = ENOENT;
+done:
+	return (-1);
 }
 
 int ie_execvp(const char *file, char *const argv[])
