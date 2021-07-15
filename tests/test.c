@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <libiosexec.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -9,13 +10,60 @@
 
 extern char **environ;
 
-int main(void) {
-  char *binaryPath = "./example.sh";
-  char *arg1 = "arg1";
-  char *arg2 = "arg2";
-  char *args[] = {binaryPath, arg1, arg2, NULL};
+int test_direct_file(void) {
+    puts("Testing normal script...");
+    int pid = fork();
+    switch (pid) {
+        case -1:
+            perror("fork");
+            return 1;
+            break;
+        case 0:
+            ie_execl("normal.sh", "normal.sh", NULL);
+            printf("FAILURE to exec at line %d: %s", __LINE__, strerror(errno));
+            break;
+        default:
+            waitpid(pid, NULL, 0);
+    }
 
-  ie_execv(binaryPath, args);
-  printf("execv test failed.");
-  return 0;
+    puts("Testing script with singular arg...");
+    pid = fork();
+    switch (pid) {
+        case -1:
+            perror("fork");
+            return 1;
+            break;
+        case 0:
+            ie_execl("normalwitharg.sh", "normalwitharg.sh", NULL);
+            printf("FAILURE to exec at line %d: %s", __LINE__, strerror(errno));
+            break;
+        default:
+            waitpid(pid, NULL, 0);
+    }
+
+    puts("Testing script with multiple args...");
+    pid = fork();
+    switch (pid) {
+        case -1:
+            perror("fork");
+            return 1;
+            break;
+        case 0:
+            ie_execl("normalwithmultipleargs.sh", "normalwithmultipleargs.sh", NULL);
+            printf("FAILURE to exec at line %d: %s", __LINE__, strerror(errno));
+            break;
+        default:
+            waitpid(pid, NULL, 0);
+    }
+
+    return 0;
+}
+
+int main(void) {
+    puts("\tTESTING DIRECT FILE EXECUTION");
+
+    int ret = test_direct_file();
+    if (ret) return ret;
+
+    puts("\n\tTESTING PATH RESOLVER");
 }
