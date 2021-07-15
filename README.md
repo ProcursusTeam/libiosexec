@@ -15,3 +15,5 @@ There's not that much to say here; simply define the symbols in your project/scr
     
     /* Wrapper functions to make iOS shells scripts function correctly */
     #include <libiosexec.h>
+
+<sub>Note that this implementation follows FreeBSD/Linux behavior of not splitting the argument passed to the shebang, unlike macOS which does.</sub>
