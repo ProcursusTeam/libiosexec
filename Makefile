@@ -4,10 +4,9 @@ LN       ?= ln
 RANLIB   ?= ranlib
 INSTALL  ?= install
 
-MEMO_PREFIX     ?=
-MEMO_SUB_PREFIX ?= /usr
-LIBDIR          ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib
-INCLUDEDIR      ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/include
+PREFIX     ?= /usr
+LIBDIR     ?= $(PREFIX)/lib
+INCLUDEDIR ?= $(PREFIX)/include
 
 SOVER := 1
 SRC   := $(wildcard *.c)
