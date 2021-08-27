@@ -24,8 +24,8 @@ libiosexec.a: $(SRC:%.c=%.o)
 	$(RANLIB) $@
 
 test: libiosexec.a
-	$(CC) $(CFLAGS) -I. tests/test.c -o tests/test $(LDFLAGS) ./libiosexec.a
-	cd tests && ./test
+	$(CC) $(CFLAGS) -I. tests/test.c -o tests/test $(LDFLAGS) $^
+	./tests/test
 
 install: all
 	$(INSTALL) -Dm644 libiosexec.$(SOVER).dylib $(DESTDIR)$(LIBDIR)/libiosexec.$(SOVER).dylib
@@ -34,6 +34,6 @@ install: all
 	$(INSTALL) -Dm644 libiosexec.h $(DESTDIR)$(INCLUDEDIR)/libiosexec.h
 
 clean:
-	rm -f libiosexec.$(SOVER).dylib libiosexec.a *.o ./tests/test
+	rm -f libiosexec.$(SOVER).dylib libiosexec.a *.o tests/test
 
 .PHONY: all clean install
