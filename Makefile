@@ -4,9 +4,9 @@ LN       ?= ln
 RANLIB   ?= ranlib
 INSTALL  ?= install
 
-PREFIX     ?= /usr
-LIBDIR     ?= $(PREFIX)/lib
-INCLUDEDIR ?= $(PREFIX)/include
+MEMO_SUB_PREFIX ?= /usr
+LIBDIR          ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib
+INCLUDEDIR      ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/include
 
 SOVER := 1
 SRC   := $(wildcard *.c)
@@ -25,7 +25,7 @@ libiosexec.a: $(SRC:%.c=%.o)
 
 test: libiosexec.a
 	$(CC) $(CFLAGS) -I. tests/test.c -o tests/test $(LDFLAGS) $^
-	./tests/test
+	cd tests && ./test
 
 install: all
 	$(INSTALL) -Dm644 libiosexec.$(SOVER).dylib $(DESTDIR)$(LIBDIR)/libiosexec.$(SOVER).dylib
