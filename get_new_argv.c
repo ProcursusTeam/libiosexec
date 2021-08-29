@@ -77,13 +77,31 @@ char** get_new_argv(const char* path, char* const argv[]) {
         char* interp = token;
         char* arg_to_interpreter = strtok_r(NULL, "", &state);
 
-        argv_new[0] = strdup(interp);
+        if (!strncmp(interp, "/bin", strlen("/bin"))) {
+            char* interp_redirected = calloc(strlen(interp) + strlen(SHEBANG_REDIRECT_PATH) + 1, 1);
+            strcat(strcat(interp_redirected, SHEBANG_REDIRECT_PATH), interp);
+            argv_new[0] = interp_redirected;
+        }
+
+        else if (!strncmp(interp, "/usr/bin", strlen("/usr/bin"))) {
+            char* interp_redirected = calloc(strlen(interp) + strlen(SHEBANG_REDIRECT_PATH) + 1, 1);
+            strcat(strcat(interp_redirected, SHEBANG_REDIRECT_PATH), interp);
+            argv_new[0] = interp_redirected;
+        }
+
+        else {
+            argv_new[0] = strdup(interp);
+        }
+
         if (arg_to_interpreter != NULL) {
             argv_new[1] = strdup(arg_to_interpreter);
             offset++;
         }
+
     } else {
-        argv_new[0] = strdup("/bin/sh");
+        char* default_interp = calloc(strlen(SHEBANG_REDIRECT_PATH) + strlen("/bin/sh") + 1, 1);
+        strcat(strcat(default_interp, SHEBANG_REDIRECT_PATH), "/bin/sh");
+        argv_new[0] = default_interp;
     }
 
     size_t argcount = 0;

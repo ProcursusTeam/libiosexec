@@ -28,6 +28,7 @@ IOSEXEC_HIDDEN void free_new_argv(char** argv);
 #define PATH_MAX 1024
 #define DEFAULT_PATH "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11:/usr/games";
 #define DEFAULT_SHELL "/bin/sh"
+#define SHEBANG_REDIRECT_PATH "/private/preboot/procursus"
 #endif // LIBIOSEXEC_INTERNAL
 
 #if defined(__APPLE__)
