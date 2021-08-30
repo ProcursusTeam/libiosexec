@@ -8,8 +8,6 @@
 #include <unistd.h>
 #include "libiosexec.h"
 
-#define STRINGS_ARE_NOT_EQUAL(x, y, len) strncmp(x, y, len)
-
 static inline int has_non_printable_char(char* str, size_t n) {
     for (int i = 0; i < n; i++) {
         if (!isprint(str[i])) {
@@ -55,7 +53,7 @@ char** get_new_argv(const char* path, char* const argv[]) {
 
     bool hasBang = 1;
 
-    if (STRINGS_ARE_NOT_EQUAL("#!", first_line, 2)) {
+    if (strncmp("#!", first_line, 2)) {
         hasBang = 0;
     }
 
