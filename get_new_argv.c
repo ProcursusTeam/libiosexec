@@ -75,14 +75,20 @@ char** get_new_argv(const char* path, char* const argv[]) {
         char* interp = token;
         char* arg_to_interpreter = strtok_r(NULL, "", &state);
 
-        if (!strncmp(interp, "/bin", strlen("/bin")) || !strncmp(interp, "/usr/bin", strlen("/usr/bin"))) {
-            char* interp_redirected = calloc(strlen(interp) + strlen(SHEBANG_REDIRECT_PATH) + 1, 1);
-            strcat(strcat(interp_redirected, SHEBANG_REDIRECT_PATH), interp);
-            argv_new[0] = interp_redirected;
+        if (strncmp(interp, "/noredirect", strlen("/noredirect"))) {
+            if (!strncmp(interp, "/bin", strlen("/bin")) || !strncmp(interp, "/usr/bin", strlen("/usr/bin"))) {
+                char* interp_redirected = calloc(strlen(interp) + strlen(SHEBANG_REDIRECT_PATH) + 1, 1);
+                strcat(strcat(interp_redirected, SHEBANG_REDIRECT_PATH), interp);
+                argv_new[0] = interp_redirected;
+            }
+
+            else {
+                argv_new[0] = strdup(interp);
+            }
         }
 
         else {
-            argv_new[0] = strdup(interp);
+            argv_new[0] = strdup(interp + strlen("/noredirect"));
         }
 
         if (arg_to_interpreter != NULL) {
