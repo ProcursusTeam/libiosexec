@@ -44,6 +44,21 @@ IOSEXEC_HIDDEN void free_new_argv(char** argv);
 #      define execve ie_execve
 #      define posix_spawn ie_posix_spawn
 #      define posix_spawnp ie_posix_spawnp
+#      define getpwent ie_getpwent
+#      define getpwuid ie_getpwuid
+#      define getpwuid_r ie_getpwuid_r
+#      define getpwnam ie_getpwnam
+#      define getpwnam_r ie_getpwnam_r
+#      define setpassent ie_setpassent
+#      define setpwent ie_setpwent
+#      define endpwent ie_endpwent
+#      define getgrent ie_getgrent
+#      define getgrgid ie_getgrgid
+#      define getgrgid_r ie_getgrgid_r
+#      define getgrnam ie_getgrnam
+#      define getgrnam_r ie_getgrnam_r
+#      define setgrent ie_setgrent
+#      define endgrent ie_endgrent
 #    endif // LIBIOSEXEC_INTERNAL
 #  endif // TARGET_OS_IPHONE
 #endif // __APPLE__

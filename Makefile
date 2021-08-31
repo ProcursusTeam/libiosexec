@@ -11,12 +11,12 @@ INCLUDEDIR      ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/include
 
 SOVER := 1
 
-SRC := execl.c execv.c utils.c get_new_argv.c posix_spawn.c
+SRC := execl.c execv.c utils.c get_new_argv.c posix_spawn.c getpwent.c getgrent.c
 
 all: libiosexec.$(SOVER).dylib libiosexec.a
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) -fvisibility=hidden -DLIBIOSEXEC_INTERNAL $^
+	$(CC) -c $(CFLAGS) -fvisibility=hidden -D_PW_NAME_LEN=MAXLOGNAME -DLIBIOSEXEC_INTERNAL $^
 
 libiosexec.$(SOVER).dylib: $(SRC:%.c=%.o)
 	$(CC) $(CFLAGS) -fvisibility=hidden -DLIBIOSEXEC_INTERNAL -install_name $(LIBDIR)/$@ -shared -o $@ $^
