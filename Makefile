@@ -10,8 +10,7 @@ LIBDIR          ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib
 INCLUDEDIR      ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/include
 
 SOVER := 1
-
-SRC := execl.c execv.c utils.c get_new_argv.c posix_spawn.c
+SRC   := $(wildcard *.c)
 
 all: libiosexec.$(SOVER).dylib libiosexec.a
 
@@ -26,7 +25,7 @@ libiosexec.a: $(SRC:%.c=%.o)
 	$(RANLIB) $@
 
 test: libiosexec.a
-	$(CC) $(CFLAGS) -I. tests/test.c -o tests/test $(LDFLAGS) ./libiosexec.a
+	$(CC) $(CFLAGS) -I. tests/test.c -o tests/test $(LDFLAGS) $^
 	cd tests && ./test
 
 install: all
@@ -36,6 +35,6 @@ install: all
 	$(INSTALL) -Dm644 libiosexec.h $(DESTDIR)$(INCLUDEDIR)/libiosexec.h
 
 clean:
-	rm -f libiosexec.$(SOVER).dylib libiosexec.a *.o ./tests/test
+	rm -f libiosexec.$(SOVER).dylib libiosexec.a *.o tests/test
 
 .PHONY: all clean install
