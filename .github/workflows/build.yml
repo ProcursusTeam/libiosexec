@@ -3,11 +3,11 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: macOS-latest
+    runs-on: macos-11
     steps:
         - name: Check out repository code
           uses: actions/checkout@v2
         - name: Compile libiosexec
           run: make all
-        - name: Build and run tests
+        - name: Run tests
           run: make test
