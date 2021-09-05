@@ -1,0 +1,13 @@
+name: "build"
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: macOS-latest
+    steps:
+        - name: Check out repository code
+          uses: actions/checkout@v2
+        - name: Compile libiosexec
+          run: make all
+        - name: Build and run tests
+          run: make test
