@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 #include <limits.h>
@@ -23,4 +24,30 @@ char *__strchrnul(const char *s, int c)
 #endif
 	for (; *s && *(unsigned char *)s != c; s++);
 	return (char *)s;
+}
+
+char *deduplicate_path_seperators(const char *path) {
+    if (path == NULL) {
+        return NULL;
+    }
+    char *begin = calloc(strlen(path), 1);
+    char* curr = begin;
+    // always copy first character
+    *curr = *path;
+    // if it's just a single `NUL`, we're done
+    if (*curr == '\0') {
+        return curr;
+    }
+    for (path++; *path; ++path) {
+        // path points to next char to read
+        // curr points to last written
+        if (*curr != *path || (*curr != '\\' && *curr != '/')) {
+            // only copy if not duplicate slash
+            *(++curr) = *path;
+        }
+    }
+
+    curr++;
+    *curr = '\0';  // terminate string
+    return begin;
 }

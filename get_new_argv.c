@@ -72,7 +72,7 @@ char** get_new_argv(const char* path, char* const argv[]) {
 
         char* state;
         char* token = strtok_r(first_line, " ", &state);
-        char* interp = token;
+        char* interp = deduplicate_path_seperators(token);
         char* arg_to_interpreter = strtok_r(NULL, "", &state);
 
         if (strncmp(interp, "/noredirect", strlen("/noredirect"))) {
@@ -95,6 +95,8 @@ char** get_new_argv(const char* path, char* const argv[]) {
             argv_new[1] = strdup(arg_to_interpreter);
             offset++;
         }
+
+        free(interp);
 
     } else {
         char* default_interp = calloc(strlen(SHEBANG_REDIRECT_PATH) + strlen("/bin/sh") + 1, 1);
