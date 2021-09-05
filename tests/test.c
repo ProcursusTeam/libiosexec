@@ -26,6 +26,21 @@ int test_direct_file(void) {
             waitpid(pid, NULL, 0);
     }
 
+    puts("Testing empty script...");
+    pid = fork();
+    switch (pid) {
+        case -1:
+            perror("fork");
+            return 1;
+            break;
+        case 0:
+            ie_execl("empty.sh", "empty.sh", NULL);
+            printf("FAILURE to exec at line %d: %s", __LINE__, strerror(errno));
+            break;
+        default:
+            waitpid(pid, NULL, 0);
+    }
+
     puts("Testing script with singular arg...");
     pid = fork();
     switch (pid) {
