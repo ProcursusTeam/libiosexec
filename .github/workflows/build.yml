@@ -7,9 +7,9 @@ jobs:
     steps:
         - name: Check out repository code
           uses: actions/checkout@v2
-        - name: Check headers
-          run: ls /usr/local/include
+        - name: Remove BerkeleyDB
+          uses: brew uninstall berkeley-db
         - name: Compile libiosexec
-          run: make all CFLAGS="-v"
+          run: make all
         - name: Run tests
           run: make test
