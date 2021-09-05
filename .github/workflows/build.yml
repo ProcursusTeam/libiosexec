@@ -8,7 +8,7 @@ jobs:
         - name: Check out repository code
           uses: actions/checkout@v2
         - name: Remove BerkeleyDB
-          uses: brew uninstall berkeley-db
+          run: brew uninstall berkeley-db
         - name: Compile libiosexec
           run: make all
         - name: Run tests
