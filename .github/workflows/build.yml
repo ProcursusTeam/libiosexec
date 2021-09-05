@@ -3,10 +3,12 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: macos-11
+    runs-on: macos-latest
     steps:
         - name: Check out repository code
           uses: actions/checkout@v2
+        - name: Check headers
+          run: ls /usr/local/include
         - name: Compile libiosexec
           run: make all CFLAGS="-v"
         - name: Run tests
