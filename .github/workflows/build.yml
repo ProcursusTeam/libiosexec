@@ -8,6 +8,6 @@ jobs:
         - name: Check out repository code
           uses: actions/checkout@v2
         - name: Compile libiosexec
-          run: make all
+          run: make all CFLAGS="-v"
         - name: Run tests
           run: make test
