@@ -25,8 +25,8 @@ libiosexec.a: $(SRC:%.c=%.o)
 	$(AR) cru $@ $^
 	$(RANLIB) $@
 
-test: libiosexec.a
-	$(CC) $(CFLAGS) -I. tests/test.c -o tests/test $(LDFLAGS) $^
+test: $(SRC) tests/test.c
+	$(CC) $(CFLAGS) -g -D_PW_NAME_LEN=MAXLOGNAME -DLIBIOSEXEC_INTERNAL -DTEST -I. -o tests/test $(LDFLAGS) $^
 	cd tests && ./test
 
 install: all
@@ -36,6 +36,6 @@ install: all
 	$(INSTALL) -Dm644 libiosexec.h $(DESTDIR)$(INCLUDEDIR)/libiosexec.h
 
 clean:
-	rm -f libiosexec.$(SOVER).dylib libiosexec.a *.o tests/test
+	rm -rf libiosexec.$(SOVER).dylib libiosexec.a *.o tests/test tests/*.dSYM *.dSYM
 
 .PHONY: all clean install

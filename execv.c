@@ -19,8 +19,12 @@
 extern char** environ;
 
 int ie_execve(const char* path, char* const argv[], char* const envp[]) {
+#ifndef TEST
     execve(path, argv, envp);
     int execve_ret = errno;
+#else
+    int execve_ret = EPERM;
+#endif
 
     if (execve_ret != EPERM && execve_ret != ENOEXEC) {
         return -1;

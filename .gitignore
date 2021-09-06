@@ -3,3 +3,4 @@
 *.a
 tests/test
 tests/a.out
+*.dSYM
