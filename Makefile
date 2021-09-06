@@ -10,7 +10,6 @@ LIBDIR          ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib
 INCLUDEDIR      ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/include
 
 SOVER := 1
-
 SRC   := $(wildcard *.c)
 
 all: libiosexec.$(SOVER).dylib libiosexec.a
