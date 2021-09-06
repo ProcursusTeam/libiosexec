@@ -3,6 +3,7 @@
 #include <sys/syslimits.h>
 #elif defined __linux__
 #include <linux/limits.h>
+#include <bsd/bsd.h>
 #endif
 #include <ctype.h>
 #include <string.h>

@@ -12,13 +12,21 @@ INCLUDEDIR      ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/include
 SOVER := 1
 SRC   := $(wildcard *.c)
 
+ifeq ($(shell uname -s), Linux)
+CFLAGS          += -fPIE -fPIC
+endif
+
 all: libiosexec.$(SOVER).dylib libiosexec.a
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) -fvisibility=hidden -D_PW_NAME_LEN=MAXLOGNAME -DLIBIOSEXEC_INTERNAL $^
 
 libiosexec.$(SOVER).dylib: $(SRC:%.c=%.o)
+ifeq ($(shell uname -s), Linux)
+	$(CC) $(CFLAGS) -fvisibility=hidden -DLIBIOSEXEC_INTERNAL -lbsd -shared -o $@ $^
+else ifeq ($(shell uname -s), Darwin)
 	$(CC) $(CFLAGS) -fvisibility=hidden -DLIBIOSEXEC_INTERNAL -install_name $(LIBDIR)/$@ -shared -o $@ $^
+endif
 
 libiosexec.a: $(SRC:%.c=%.o)
 	$(AR) cru $@ $^
