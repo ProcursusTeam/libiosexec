@@ -10,4 +10,4 @@ jobs:
         - name: Compile libiosexec
           run: make all CFLAGS="-isysroot $(xcrun --sdk macosx --show-sdk-path)"
         - name: Run tests
-          run: make test
+          run: make test CFLAGS="-isysroot $(xcrun --sdk macosx --show-sdk-path)"
