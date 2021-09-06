@@ -10,11 +10,7 @@ int ie_posix_spawn(pid_t *pid, const char *path,
                        const posix_spawnattr_t *attrp,
                        char *const argv[],
                        char *const envp[]) {
-#ifndef TEST
    int err = posix_spawn(pid, path, file_actions, attrp, argv, envp);
-#else
-   int err = EPERM;
-#endif
    if (err != EPERM && err != ENOEXEC) {
        return err;
    }
