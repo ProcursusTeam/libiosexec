@@ -18,7 +18,10 @@ ifeq ($(shell uname -s), Linux)
 CFLAGS          += -fPIE -fPIC
 endif
 
-CFLAGS          += -DLIBIOSEXEC_PREFIXED_ROOT -DDEFAULT_INTERPRETER='"$(DEFAULT_INTERPRETER)"'
+CFLAGS          += -DDEFAULT_INTERPRETER='"$(DEFAULT_INTERPRETER)"'
+ifneq (,$(LIBIOSEXEC_PREFIXED_ROOT))
+CFLAGS   		+= -DLIBIOSEXEC_PREFIXED_ROOT
+endif
 
 all: libiosexec.$(SOVER).dylib libiosexec.a
 
