@@ -18,15 +18,14 @@ ifeq ($(shell uname -s), Linux)
 CFLAGS          += -fPIE -fPIC
 endif
 
-CFLAGS          += -DDEFAULT_INTERPRETER='"$(DEFAULT_INTERPRETER)"'
-ifneq (,$(LIBIOSEXEC_PREFIXED_ROOT))
-CFLAGS   		+= -DLIBIOSEXEC_PREFIXED_ROOT
+ifeq ($(LIBIOSEXEC_PREFIXED_ROOT),)
+LIBIOSEXEC_PREFIXED_ROOT := 1
 endif
 
 all: libiosexec.$(SOVER).dylib libiosexec.a
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) -fvisibility=hidden -D_PW_NAME_LEN=MAXLOGNAME -DLIBIOSEXEC_INTERNAL $^
+	$(CC) -c $(CFLAGS) -fvisibility=hidden -D_PW_NAME_LEN=MAXLOGNAME -DLIBIOSEXEC_INTERNAL -DLIBIOSEXEC_PREFIXED_ROOT=$(LIBIOSEXEC_PREFIXED_ROOT) -DDEFAULT_INTERPRETER='"$(DEFAULT_INTERPRETER)"' $^
 
 libiosexec.$(SOVER).dylib: $(SRC:%.c=%.o)
 ifeq ($(shell uname -s), Linux)
