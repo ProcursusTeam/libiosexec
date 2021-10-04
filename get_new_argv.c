@@ -75,6 +75,7 @@ char** get_new_argv(const char* path, char* const argv[]) {
         char* interp = deduplicate_path_seperators(token);
         char* arg_to_interpreter = strtok_r(NULL, "", &state);
 
+#ifdef LIBIOSEXEC_PREFIXED_ROOT
         if (strncmp(interp, "/noredirect", strlen("/noredirect"))) {
             if (!strncmp(interp, "/bin", strlen("/bin")) || !strncmp(interp, "/usr/bin", strlen("/usr/bin"))) {
                 char* interp_redirected = calloc(strlen(interp) + strlen(SHEBANG_REDIRECT_PATH) + 1, 1);
@@ -97,10 +98,17 @@ char** get_new_argv(const char* path, char* const argv[]) {
         }
 
         free(interp);
+#else
+        argv_new[0] = interp;
+#endif
 
     } else {
-        char* default_interp = calloc(strlen(SHEBANG_REDIRECT_PATH) + strlen("/bin/sh") + 1, 1);
-        strcat(strcat(default_interp, SHEBANG_REDIRECT_PATH), "/bin/sh");
+#ifdef LIBIOSEXEC_PREFIXED_ROOT
+        char* default_interp = calloc(strlen(SHEBANG_REDIRECT_PATH) + strlen(DEFAULT_INTERPRETER) + 1, 1);
+        strcat(strcat(default_interp, SHEBANG_REDIRECT_PATH), DEFAULT_INTERPRETER);
+#else
+        char* default_interp = strdup(DEFAULT_INTERPRETER);
+#endif
         argv_new[0] = default_interp;
     }
 

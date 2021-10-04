@@ -9,12 +9,16 @@ MEMO_SUB_PREFIX ?= /usr
 LIBDIR          ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib
 INCLUDEDIR      ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/include
 
+DEFAULT_INTERPRETER ?= /bin/sh
+
 SOVER := 1
 SRC   := $(wildcard *.c)
 
 ifeq ($(shell uname -s), Linux)
 CFLAGS          += -fPIE -fPIC
 endif
+
+CFLAGS          += -DLIBIOSEXEC_PREFIXED_ROOT -DDEFAULT_INTERPRETER='"$(DEFAULT_INTERPRETER)"'
 
 all: libiosexec.$(SOVER).dylib libiosexec.a
 
