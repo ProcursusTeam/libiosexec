@@ -2,6 +2,7 @@
 #define LIBIOSEXEC_H
 
 #include <spawn.h>
+#include <sys/utsname.h>
 
 #define IOSEXEC_PUBLIC __attribute__ ((visibility ("default")))
 #define IOSEXEC_HIDDEN __attribute__ ((visibility ("hidden")))
@@ -20,6 +21,8 @@ IOSEXEC_PUBLIC int ie_execvpe(const char* file, char* const argv[], char* const 
 IOSEXEC_PUBLIC int ie_execve(const char* path, char* const argv[], char* const envp[]); 
 IOSEXEC_PUBLIC int ie_posix_spawn(pid_t *pid, const char *path, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const argv[], char *const envp[]);
 IOSEXEC_PUBLIC int ie_posix_spawnp(pid_t *pid, const char *name, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const argv[], char *const envp[]);
+
+IOSEXEC_PUBLIC int ie_uname(struct utsname *name);
 
 #ifdef LIBIOSEXEC_INTERNAL
 IOSEXEC_HIDDEN char** get_new_argv(const char* path, char* const argv[]);
@@ -43,6 +46,7 @@ IOSEXEC_HIDDEN void free_new_argv(char** argv);
 #      define execve ie_execve
 #      define posix_spawn ie_posix_spawn
 #      define posix_spawnp ie_posix_spawnp
+#      define uname ie_uname
 #    endif // LIBIOSEXEC_INTERNAL
 #  endif // TARGET_OS_IPHONE
 #endif // __APPLE__
