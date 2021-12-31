@@ -49,8 +49,8 @@ ie_uname(name)
 			}
 	mib[0] = CTL_HW;
 #if defined(__arm64__) && defined(__APPLE__)
-	char *ie_machine = "aaaaaaa";
-	strlcpy((char *)&name->machine, ie_machine, 256);
+	char *ie_machine = "arm64";
+	strcpy(&name->machine, ie_machine);
 #else
 	mib[1] = HW_MACHINE;
 	len = sizeof(name->machine);
