@@ -20,8 +20,10 @@ IOSEXEC_PUBLIC int ie_execv(const char* path, char *const argv[]);
 IOSEXEC_PUBLIC int ie_execvp(const char* file, char* const argv[]);
 IOSEXEC_PUBLIC int ie_execvpe(const char* file, char* const argv[], char* const envp[]);
 IOSEXEC_PUBLIC int ie_execve(const char* path, char* const argv[], char* const envp[]); 
-IOSEXEC_PUBLIC int ie_posix_spawn(pid_t *pid, const char *path, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const argv[], char *const envp[]);
-IOSEXEC_PUBLIC int ie_posix_spawnp(pid_t *pid, const char *name, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const argv[], char *const envp[]);
+#ifndef LIBIOSEXEC_NO_SPAWN
+  IOSEXEC_PUBLIC int ie_posix_spawn(pid_t *pid, const char *path, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const argv[], char *const envp[]);
+  IOSEXEC_PUBLIC int ie_posix_spawnp(pid_t *pid, const char *name, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const argv[], char *const envp[]);
+#endif
 
 #ifdef LIBIOSEXEC_INTERNAL
 IOSEXEC_HIDDEN char** get_new_argv(const char* path, char* const argv[]);
@@ -43,8 +45,10 @@ IOSEXEC_HIDDEN void free_new_argv(char** argv);
 #      define execvp ie_execvp
 #      define execvpe ie_execvpe
 #      define execve ie_execve
-#      define posix_spawn ie_posix_spawn
-#      define posix_spawnp ie_posix_spawnp
+#      ifndef LIBIOSEXEC_NO_SPAWN
+#        define posix_spawn ie_posix_spawn
+#        define posix_spawnp ie_posix_spawnp
+#      endif
 #    endif // LIBIOSEXEC_INTERNAL
 #  endif // TARGET_OS_IPHONE
 #endif // __APPLE__
