@@ -1,7 +1,9 @@
 #ifndef LIBIOSEXEC_H
 #define LIBIOSEXEC_H
 
-#include <spawn.h>
+#ifndef LIBIOSEXEC_NO_SPAWN
+#  include <spawn.h>
+#endif
 
 #define IOSEXEC_PUBLIC __attribute__ ((visibility ("default")))
 #define IOSEXEC_HIDDEN __attribute__ ((visibility ("hidden")))
