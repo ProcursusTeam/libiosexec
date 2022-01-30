@@ -1,9 +1,7 @@
 #ifndef LIBIOSEXEC_H
 #define LIBIOSEXEC_H
 
-#ifndef LIBIOSEXEC_NO_SPAWN
-#  include <spawn.h>
-#endif
+#include <sys/_types/_pid_t.h>
 
 #define IOSEXEC_PUBLIC __attribute__ ((visibility ("default")))
 #define IOSEXEC_HIDDEN __attribute__ ((visibility ("hidden")))
@@ -20,10 +18,8 @@ IOSEXEC_PUBLIC int ie_execv(const char* path, char *const argv[]);
 IOSEXEC_PUBLIC int ie_execvp(const char* file, char* const argv[]);
 IOSEXEC_PUBLIC int ie_execvpe(const char* file, char* const argv[], char* const envp[]);
 IOSEXEC_PUBLIC int ie_execve(const char* path, char* const argv[], char* const envp[]); 
-#ifndef LIBIOSEXEC_NO_SPAWN
-  IOSEXEC_PUBLIC int ie_posix_spawn(pid_t *pid, const char *path, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const argv[], char *const envp[]);
-  IOSEXEC_PUBLIC int ie_posix_spawnp(pid_t *pid, const char *name, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const argv[], char *const envp[]);
-#endif
+IOSEXEC_PUBLIC int ie_posix_spawn(pid_t *pid, const char *path, const void **file_actions, const void **attrp, char *const argv[], char *const envp[]);
+IOSEXEC_PUBLIC int ie_posix_spawnp(pid_t *pid, const char *name, const void **file_actions, const void **attrp, char *const argv[], char *const envp[]);
 
 #ifdef LIBIOSEXEC_INTERNAL
 IOSEXEC_HIDDEN char** get_new_argv(const char* path, char* const argv[]);
