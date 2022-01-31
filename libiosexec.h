@@ -1,8 +1,6 @@
 #ifndef LIBIOSEXEC_H
 #define LIBIOSEXEC_H
 
-#include <sys/_types/_pid_t.h>
-
 #define IOSEXEC_PUBLIC __attribute__ ((visibility ("default")))
 #define IOSEXEC_HIDDEN __attribute__ ((visibility ("hidden")))
 
@@ -18,8 +16,15 @@ IOSEXEC_PUBLIC int ie_execv(const char* path, char *const argv[]);
 IOSEXEC_PUBLIC int ie_execvp(const char* file, char* const argv[]);
 IOSEXEC_PUBLIC int ie_execvpe(const char* file, char* const argv[], char* const envp[]);
 IOSEXEC_PUBLIC int ie_execve(const char* path, char* const argv[], char* const envp[]); 
-IOSEXEC_PUBLIC int ie_posix_spawn(pid_t *pid, const char *path, const void **file_actions, const void **attrp, char *const argv[], char *const envp[]);
-IOSEXEC_PUBLIC int ie_posix_spawnp(pid_t *pid, const char *name, const void **file_actions, const void **attrp, char *const argv[], char *const envp[]);
+
+/*
+ * If spawn.h was already included then we need these prototypes,
+ * otherwise the defines below will let us use the prototypes from spawn.h
+ */
+#ifdef SPAWN_H
+IOSEXEC_PUBLIC int ie_posix_spawn(pid_t *pid, const char *path, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const argv[], char *const envp[]);
+IOSEXEC_PUBLIC int ie_posix_spawnp(pid_t *pid, const char *name, const posix_spawn_file_actions_t *file_actions, const posix_spawnattr_t *attrp, char *const argv[], char *const envp[]);
+#endif
 
 #ifdef LIBIOSEXEC_INTERNAL
 IOSEXEC_HIDDEN char** get_new_argv(const char* path, char* const argv[]);
@@ -41,10 +46,8 @@ IOSEXEC_HIDDEN void free_new_argv(char** argv);
 #      define execvp ie_execvp
 #      define execvpe ie_execvpe
 #      define execve ie_execve
-#      ifndef LIBIOSEXEC_NO_SPAWN
-#        define posix_spawn ie_posix_spawn
-#        define posix_spawnp ie_posix_spawnp
-#      endif
+#      define posix_spawn ie_posix_spawn
+#      define posix_spawnp ie_posix_spawnp
 #    endif // LIBIOSEXEC_INTERNAL
 #  endif // TARGET_OS_IPHONE
 #endif // __APPLE__
