@@ -24,8 +24,6 @@ IOSEXEC_PUBLIC int ie_posix_spawnp(pid_t *pid, const char *name, const posix_spa
 
 IOSEXEC_PUBLIC int ie_uname(struct utsname *name);
 
-IOSEXEC_PUBLIC void *ie_dlsym(void* handle, const char* symbol);
-
 #ifdef LIBIOSEXEC_INTERNAL
 IOSEXEC_HIDDEN char** get_new_argv(const char* path, char* const argv[]);
 IOSEXEC_HIDDEN void free_new_argv(char** argv);
@@ -49,9 +47,6 @@ IOSEXEC_HIDDEN void free_new_argv(char** argv);
 #      define posix_spawn ie_posix_spawn
 #      define posix_spawnp ie_posix_spawnp
 #      define uname ie_uname
-#      ifdef LIBIOSEXEC_DLSYM
-#        define dlsym ie_dlsym
-#      endif
 #    endif // LIBIOSEXEC_INTERNAL
 #  endif // TARGET_OS_IPHONE
 #endif // __APPLE__
