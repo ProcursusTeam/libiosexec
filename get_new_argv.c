@@ -6,9 +6,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "libiosexec.h"
 
-#define STRINGS_ARE_NOT_EQUAL(x, y, len) strncmp(x, y, len)
+#include "libiosexec.h"
+#include "libiosexec_private.h"
 
 static inline int has_non_printable_char(char* str, size_t n) {
     for (int i = 0; i < n; i++) {
@@ -55,7 +55,7 @@ char** get_new_argv(const char* path, char* const argv[]) {
 
     bool hasBang = 1;
 
-    if (STRINGS_ARE_NOT_EQUAL("#!", first_line, 2)) {
+    if (strncmp("#!", first_line, 2)) {
         hasBang = 0;
     }
 
@@ -74,16 +74,44 @@ char** get_new_argv(const char* path, char* const argv[]) {
 
         char* state;
         char* token = strtok_r(first_line, " ", &state);
-        char* interp = token;
+        char* interp = deduplicate_path_seperators(token);
         char* arg_to_interpreter = strtok_r(NULL, "", &state);
 
-        argv_new[0] = strdup(interp);
+#if LIBIOSEXEC_PREFIXED_ROOT==1
+        if (strncmp(interp, "/noredirect", strlen("/noredirect"))) {
+            if (!strncmp(interp, "/bin", strlen("/bin")) || !strncmp(interp, "/usr/bin", strlen("/usr/bin"))) {
+                char* interp_redirected = calloc(strlen(interp) + strlen(SHEBANG_REDIRECT_PATH) + 1, 1);
+                strcat(strcat(interp_redirected, SHEBANG_REDIRECT_PATH), interp);
+                argv_new[0] = interp_redirected;
+            }
+
+            else {
+                argv_new[0] = strdup(interp);
+            }
+        }
+
+        else {
+            argv_new[0] = strdup(interp + strlen("/noredirect"));
+        }
+
         if (arg_to_interpreter != NULL) {
             argv_new[1] = strdup(arg_to_interpreter);
             offset++;
         }
+
+        free(interp);
+#else
+        argv_new[0] = interp;
+#endif
+
     } else {
-        argv_new[0] = strdup("/bin/sh");
+#if LIBIOSEXEC_PREFIXED_ROOT==1
+        char* default_interp = calloc(strlen(SHEBANG_REDIRECT_PATH) + strlen(DEFAULT_INTERPRETER) + 1, 1);
+        strcat(strcat(default_interp, SHEBANG_REDIRECT_PATH), DEFAULT_INTERPRETER);
+#else
+        char* default_interp = strdup(DEFAULT_INTERPRETER);
+#endif
+        argv_new[0] = default_interp;
     }
 
     size_t argcount = 0;

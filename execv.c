@@ -1,8 +1,8 @@
-#include "utils.h"
 #if defined (__APPLE__)
 #include <sys/syslimits.h>
 #elif defined __linux__
 #include <linux/limits.h>
+#include <bsd/bsd.h>
 #endif
 #include <ctype.h>
 #include <string.h>
@@ -11,18 +11,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "libiosexec.h"
 #include <sys/uio.h>
+#include <stdbool.h>
 
-#define STRINGS_ARE_NOT_EQUAL(x, y, len) strncmp(x, y, len)
+#include "utils.h"
+#include "libiosexec.h"
+#include "libiosexec_private.h"
 
 extern char** environ;
 
 int ie_execve(const char* path, char* const argv[], char* const envp[]) {
-    execve(path, argv, envp);
+    bool bypass_sysexecve = false;
+
+#if LIBIOSEXEC_PREFIXED_ROOT == 1
+    if (is_shell_script(path)) {
+        bypass_sysexecve = true;
+    }
+#endif
+
+    if (!bypass_sysexecve) {
+        execve(path, argv, envp);
+    }
+
     int execve_ret = errno;
 
-    if (execve_ret != EPERM && execve_ret != ENOEXEC) {
+    if (!bypass_sysexecve && (execve_ret != EPERM && execve_ret != ENOEXEC)) {
         return -1;
     }
 
@@ -129,7 +142,7 @@ retry:		(void)ie_execve(bp, argv, envp);
 			memp[0] = "sh";
 			memp[1] = bp;
 			bcopy(argv + 1, memp + 2, cnt * sizeof(char *));
-			(void)ie_execve(DEFAULT_SHELL, memp, envp);
+			(void)ie_execve(DEFAULT_INTERPRETER, memp, envp);
 			goto done;
 		case ENOMEM:
 			goto done;

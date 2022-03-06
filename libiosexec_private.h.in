@@ -1,0 +1,9 @@
+#include "libiosexec.h"
+
+IOSEXEC_HIDDEN char** get_new_argv(const char* path, char* const argv[]);
+IOSEXEC_HIDDEN void free_new_argv(char** argv);
+// PATH_MAX for Darwin
+#define PATH_MAX 1024
+
+#define DEFAULT_PATH "@DEFAULT_PATH@"
+#define SHEBANG_REDIRECT_PATH "@SHEBANG_REDIRECT_PATH@"
