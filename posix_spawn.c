@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "utils.h"
 #include "libiosexec.h"
 #include "libiosexec_private.h"
 
