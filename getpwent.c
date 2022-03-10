@@ -42,6 +42,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <sys/param.h>
 
 #include "libiosexec.h"
 #include "libiosexec_private.h"
@@ -57,11 +58,11 @@
 
 #define _PW_BUF_LEN 1024
 
-//#undef _PATH_MP_DB
-//#define _PATH_MP_DB "/tmp/pwd.db"
-//
-//#undef _PATH_SMP_DB
-//#define _PATH_SMP_DB "/tmp/spwd.db"
+#undef _PATH_MP_DB
+#define _PATH_MP_DB "/tmp/passwd/pwd.db"
+
+#undef _PATH_SMP_DB
+#define _PATH_SMP_DB "/tmp/passwd/spwd.db"
 
 #define MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
 
@@ -149,7 +150,7 @@ ie_getpwent(void)
 	DBT key;
 
 	_THREAD_PRIVATE_MUTEX_LOCK(pw);
-	if (!_pw_db && !__initdb(0))
+	if (!_pw_db && !__initdb(geteuid() == 0 ? true : false))
 		goto done;
 
 	/* Allocate space for struct and strings, unmapping the old. */
@@ -258,7 +259,7 @@ int
 ie_getpwnam_r(const char *name, struct passwd *pw, char *buf, size_t buflen,
     struct passwd **pwretp)
 {
-	return getpwnam_internal(name, pw, buf, buflen, pwretp, false, true);
+	return getpwnam_internal(name, pw, buf, buflen, pwretp, geteuid() == 0 ? true : false, true);
 }
 DEF_WEAK(getpwnam_r);
 
@@ -268,28 +269,13 @@ ie_getpwnam(const char *name)
 	struct passwd *pw = NULL;
 	int my_errno;
 
-	my_errno = getpwnam_internal(name, NULL, NULL, 0, &pw, false, false);
+	my_errno = getpwnam_internal(name, NULL, NULL, 0, &pw, geteuid() == 0 ? true : false, false);
 	if (my_errno) {
 		pw = NULL;
 		errno = my_errno;
 	}
 	return (pw);
 }
-
-struct passwd *
-ie_getpwnam_shadow(const char *name)
-{
-	struct passwd *pw = NULL;
-	int my_errno;
-
-	my_errno = getpwnam_internal(name, NULL, NULL, 0, &pw, true, false);
-	if (my_errno) {
-		pw = NULL;
-		errno = my_errno;
-	}
-	return (pw);
-}
-DEF_WEAK(getpwnam_shadow);
 
 static int
 getpwuid_internal(uid_t uid, struct passwd *pw, char *buf, size_t buflen,
@@ -337,7 +323,7 @@ int
 ie_getpwuid_r(uid_t uid, struct passwd *pw, char *buf, size_t buflen,
     struct passwd **pwretp)
 {
-	return getpwuid_internal(uid, pw, buf, buflen, pwretp, false, true);
+	return getpwuid_internal(uid, pw, buf, buflen, pwretp, geteuid() == 0 ? true : false, true);
 }
 DEF_WEAK(ie_getpwuid_r);
 
@@ -347,28 +333,13 @@ ie_getpwuid(uid_t uid)
 	struct passwd *pw = NULL;
 	int my_errno;
 
-	my_errno = getpwuid_internal(uid, NULL, NULL, 0, &pw, false, false);
+	my_errno = getpwuid_internal(uid, NULL, NULL, 0, &pw, geteuid() == 0 ? true : false, false);
 	if (my_errno) {
 		pw = NULL;
 		errno = my_errno;
 	}
 	return (pw);
 }
-
-struct passwd *
-ie_getpwuid_shadow(uid_t uid)
-{
-	struct passwd *pw = NULL;
-	int my_errno;
-
-	my_errno = getpwuid_internal(uid, NULL, NULL, 0, &pw, true, false);
-	if (my_errno) {
-		pw = NULL;
-		errno = my_errno;
-	}
-	return (pw);
-}
-DEF_WEAK(ie_getpwuid_shadow);
 
 int
 ie_setpassent(int stayopen)
