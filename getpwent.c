@@ -58,11 +58,13 @@
 
 #define _PW_BUF_LEN 1024
 
+#if 0
 #undef _PATH_MP_DB
 #define _PATH_MP_DB "/tmp/passwd/pwd.db"
 
 #undef _PATH_SMP_DB
 #define _PATH_SMP_DB "/tmp/passwd/spwd.db"
+#endif
 
 #define MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
 
