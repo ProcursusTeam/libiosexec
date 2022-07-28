@@ -3,15 +3,30 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <stdbool.h>
+
+#include "utils.h"
 #include "libiosexec.h"
+#include "libiosexec_private.h"
 
 int ie_posix_spawn(pid_t *pid, const char *path,
                        const posix_spawn_file_actions_t *file_actions,
                        const posix_spawnattr_t *attrp,
                        char *const argv[],
                        char *const envp[]) {
-   int err = posix_spawn(pid, path, file_actions, attrp, argv, envp);
-   if (err != EPERM && err != ENOEXEC) {
+   bool bypass_sysposix_spawn = false;
+   int err;
+
+#if LIBIOSEXEC_PREFIXED_ROOT == 1
+   if (is_shell_script(path)) {
+       bypass_sysposix_spawn = true;
+   }
+#endif
+
+   if (!bypass_sysposix_spawn)
+       err = posix_spawn(pid, path, file_actions, attrp, argv, envp);
+
+   if (!bypass_sysposix_spawn && (err != EPERM && err != ENOEXEC)) {
        return err;
    }
 
