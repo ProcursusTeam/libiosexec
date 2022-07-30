@@ -93,17 +93,16 @@ char** get_new_argv(const char* path, char* const argv[]) {
         else {
             argv_new[0] = strdup(interp + strlen("/noredirect"));
         }
-
+#else
+        argv_new[0] = interp;
+#endif
         if (arg_to_interpreter != NULL) {
             argv_new[1] = strdup(arg_to_interpreter);
             offset++;
         }
-
+#if LIBIOSEXEC_PREFIXED_ROOT==1
         free(interp);
-#else
-        argv_new[0] = interp;
 #endif
-
     } else {
 #if LIBIOSEXEC_PREFIXED_ROOT==1
         char* default_interp = calloc(strlen(SHEBANG_REDIRECT_PATH) + strlen(DEFAULT_INTERPRETER) + 1, 1);
