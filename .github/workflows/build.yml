@@ -14,9 +14,6 @@ on:
       - '**/*.txt'  
       - '.gitignore'  
 
-env:
-  LIBIOSEXEC_CFLAGS: -isysroot $(xcrun --sdk macosx --show-sdk-path)
-
 jobs:
   build:
     runs-on: macos-latest
@@ -25,7 +22,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Compile libiosexec
         run: |
-          make all CFLAGS="${{ env.LIBIOSEXEC_CFLAGS }}"
+          make all
       - name: Run tests
         run: |
-          make test CFLAGS="${{ env.LIBIOSEXEC_CFLAGS }}"
+          make test
