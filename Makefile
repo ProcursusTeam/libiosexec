@@ -13,7 +13,7 @@ DEFAULT_INTERPRETER ?= /bin/sh
 
 SOVER    := 1
 
-SRC      := execl.c execv.c get_new_argv.c posix_spawn.c utils.c
+SRC      := execl.c execv.c get_new_argv.c posix_spawn.c system.c utils.c
 PWD_SRC  := getgrent.c getpwent.c pwcache.c
 WRAP_SRC := fake_getgrent.c fake_getpwent.c
 
