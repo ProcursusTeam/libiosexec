@@ -74,11 +74,48 @@ int test_direct_file(void) {
     return 0;
 }
 
+int test_posix_spawn(void) {
+    pid_t pid;
+    const char *args[] = {"normal.sh", NULL};
+    int err = ie_posix_spawn(&pid, "normal.sh", NULL, NULL, (char * const *)args, NULL);
+    if (err != 0) {
+        printf("\nposix_spawn failed: %s", strerror(errno));
+    }
+    waitpid(pid, NULL, 0);
+    return err;
+}
+
+int test_system(void) {
+    int err;
+    err = ie_system(NULL);
+    if (err != 0)
+        puts("Interpreter is available");
+    else {
+        puts("Interpreter is NOT available");
+        return 1;
+    }
+
+    err = ie_system("./normal.sh");
+    if (err == -1)
+        printf("\nsystem failed: %s", strerror(errno));
+    else if (err == 127)
+        printf("\nsystem failed to execute shell");
+    return err;
+}
+
 int main(void) {
     puts("\tTESTING DIRECT FILE EXECUTION");
 
     int ret = test_direct_file();
-    if (ret) return ret;
+    if (ret != 0) return ret;
 
-    puts("\n\tTESTING PATH RESOLVER");
+    puts("\n\tTESTING posix_spawn");
+
+    ret = test_posix_spawn();
+    if (ret != 0) return ret;
+
+    puts("\n\tTESTING system");
+
+    ret = test_system();
+    if (ret != 0) return ret;
 }
