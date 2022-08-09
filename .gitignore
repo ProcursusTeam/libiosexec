@@ -3,3 +3,13 @@
 *.a
 *.dSYM
 libiosexec_private.h
+tests/t_ie_execl
+tests/t_ie_execle
+tests/t_ie_execlp
+tests/t_ie_execv
+tests/t_ie_execve
+tests/t_ie_execvp
+tests/t_ie_execvpe
+tests/t_ie_posix_spawn
+tests/t_ie_posix_spawnp
+tests/t_ie_system

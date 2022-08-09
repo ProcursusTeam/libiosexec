@@ -81,7 +81,7 @@ TEST_scripts := tests/scripts/empty.sh \
 
 check: $(TEST_progs)
 	success=0; \
-	PATH="$(PATH):$$(realpath tests/scripts)"; \
+	PATH="$(PATH):$(PWD)/tests/scripts"; \
 	for test in $^; do \
 		for script in $(TEST_scripts); do \
 			printf '%s %s... ' $$(basename $$test) $$(basename $$script); \
