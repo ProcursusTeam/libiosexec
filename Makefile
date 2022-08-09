@@ -57,9 +57,43 @@ libiosexec.a: $(SRC:%.c=%.o)
 	$(AR) cru $@ $^
 	$(RANLIB) $@
 
-test: $(SRC) tests/test.c
-	$(CC) $(CFLAGS) -I. -o tests/test $(LDFLAGS) $^
-	cd tests && ./test
+
+TEST_progs := tests/t_ie_execve \
+	tests/t_ie_execv \
+	tests/t_ie_execle \
+	tests/t_ie_execl \
+	tests/t_ie_execvpe \
+	tests/t_ie_execvp \
+	tests/t_ie_execlp \
+	tests/t_ie_posix_spawn \
+	tests/t_ie_posix_spawnp \
+	tests/t_ie_system
+
+TEST_scripts := tests/scripts/empty.sh \
+	tests/scripts/normal.sh \
+	tests/scripts/normalwitharg.sh \
+	tests/scripts/normalwithmultipleargs.sh \
+	tests/scripts/noshebang.sh
+                
+
+%: %.c libiosexec.a
+	$(CC) -I. $(CFLAGS) $(LDFLAGS) -o $@ $^
+
+check: $(TEST_progs)
+	success=0; \
+	PATH="$(PATH):$$(realpath tests/scripts)"; \
+	for test in $^; do \
+		for script in $(TEST_scripts); do \
+			printf '%s %s... ' $$(basename $$test) $$(basename $$script); \
+			if $$test $$script; then \
+				printf 'success\n'; \
+			else \
+				success=1; \
+				printf 'FAILED!\n'; \
+			fi; \
+		done; \
+	done; \
+	exit $$success
 
 install: all
 	$(INSTALL) -Dm644 libiosexec.$(SOVER).dylib $(DESTDIR)$(LIBDIR)/libiosexec.$(SOVER).dylib
@@ -68,6 +102,6 @@ install: all
 	$(INSTALL) -Dm644 libiosexec.h $(DESTDIR)$(INCLUDEDIR)/libiosexec.h
 
 clean:
-	rm -rf libiosexec.$(SOVER).dylib libiosexec.a *.o tests/test tests/*.dSYM *.dSYM libiosexec_private.h
+	rm -rf libiosexec.$(SOVER).dylib libiosexec.a *.o tests/test tests/*.dSYM *.dSYM libiosexec_private.h $(TEST_progs)
 
 .PHONY: all clean install

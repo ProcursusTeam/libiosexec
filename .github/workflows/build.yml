@@ -25,4 +25,4 @@ jobs:
           make all
       - name: Run tests
         run: |
-          make test
+          make check

@@ -1,7 +1,5 @@
 *.o
 *.dylib
 *.a
-tests/test
-tests/a.out
 *.dSYM
 libiosexec_private.h
