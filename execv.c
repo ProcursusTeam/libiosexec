@@ -40,11 +40,13 @@ int ie_execve(const char* path, char* const argv[], char* const envp[]) {
     }
 
     char** argv_new = get_new_argv(path, argv);
+
+    int ret;
     if (argv_new == NULL) {
         return -1;
+    } else {
+        ret = ie_execve(argv_new[0], argv_new, envp);
     }
-
-    int ret = ie_execve(argv_new[0], argv_new, envp);
     int saved_errno = errno;
     free_new_argv(argv_new);
     errno = saved_errno;

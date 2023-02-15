@@ -59,7 +59,9 @@ char** get_new_argv(const char* path, char* const argv[]) {
         hasBang = 0;
     }
 
-    char** argv_new = calloc(1024, 1);
+    size_t argcount = 0;
+    while(argv[argcount]) argcount++;
+    char** argv_new = (char **)calloc(argcount + 2, sizeof(char*));
     if (!argv_new) {
         errno = ENOMEM;
         return NULL;
@@ -113,9 +115,6 @@ char** get_new_argv(const char* path, char* const argv[]) {
         argv_new[0] = default_interp;
     }
 
-    size_t argcount = 0;
-    while(argv[argcount]) argcount++;
-
     argv_new[1 + offset] = strdup(path);
 
     for (int i = 1; i < argcount; i++) {
@@ -130,6 +129,7 @@ char** get_new_argv(const char* path, char* const argv[]) {
 void free_new_argv(char** argv) {
     for(int i = 0; argv[i] != NULL; i++) {
         free(argv[i]);
+        argv[i] = NULL;
     }
 
     free(argv);
