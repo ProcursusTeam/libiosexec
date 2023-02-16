@@ -1,136 +1,117 @@
 #include <errno.h>
-#include "utils.h"
-#include <ctype.h>
-#include <string.h>
-#include <stdbool.h>
-#include <stdio.h>
+#include <fcntl.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "libiosexec.h"
 #include "libiosexec_private.h"
 
-static inline int has_non_printable_char(char* str, size_t n) {
-    for (int i = 0; i < n; i++) {
-        if (!isprint(str[i])) {
-                return 1;
-        }
-    }
+#include "utils.h"
 
-    return 0;
+// Stolen from xnu/bsd/kern/kern_exec.c
+#define IS_WHITESPACE(ch) ((ch == ' ') || (ch == '\t'))
+#define IS_EOL(ch) ((ch == '#') || (ch == '\n') || (ch == '\0'))
+
+char **
+get_new_argv(const char *path, char *const argv[])
+{
+	int argc = 0, interpc = 0;
+	char **newargv = NULL;
+	char **interpargv = NULL;
+	char interpbuf[512] = {0};
+	int fd = 0;
+	ssize_t sz = 0;
+	char *startp = NULL, *endp = NULL;
+
+	if ((fd = open(path, O_RDONLY)) == -1)
+		return NULL;
+
+	while (argv[argc] != NULL)
+		argc++;
+
+	if ((sz = read(fd, interpbuf, 2)) == 2) {
+		if (interpbuf[0] == '#' && interpbuf[1] == '!') {
+			if ((sz = read(fd, interpbuf, 510)) == -1) {
+				errno = ENOEXEC; /* If we fail to read we should bail */
+				return NULL;
+			}
+			/* Find start and end pointer first */
+			startp = interpbuf;
+			for (int i = 0; i < 510; i++, startp++) {
+				if (IS_EOL(*startp)) {
+					errno = ENOEXEC; /* No shebang!? */
+					return NULL;
+				} else if (IS_WHITESPACE(*startp)) {
+					/* Keep looking */
+				} else {
+					break; /* Found start! */
+				}
+			}
+			endp = startp;
+			for (int i = 0; i < 510; i++, endp++) {
+				if (IS_EOL(*endp)) {
+					break; /* Found end */
+				}
+			}
+			if (!IS_EOL(*endp)) {
+				errno = ENOEXEC;
+				return NULL;
+			}
+			/* Walk endp back to the first non-whitespace */
+			while (IS_EOL(*endp) || IS_WHITESPACE(*endp))
+				endp--;
+			endp++; /* Character after the last valid char */
+			*endp = '\0';
+			while (startp) {
+				char *ch = startp;
+				while (*ch && !IS_WHITESPACE(*ch))
+					ch++;
+				if (*ch == '\0') {
+					interpc++;
+					interpargv = realloc(interpargv, interpc * sizeof(char *));
+					interpargv[interpc - 1] = strdup(startp);
+					startp = NULL;
+				} else {
+					*ch = '\0';
+					interpc++;
+					interpargv = realloc(interpargv, interpc * sizeof(char *));
+					interpargv[interpc - 1] = strdup(startp);
+					startp = ch + 1;
+					while (IS_WHITESPACE(*startp))
+						startp++;
+				}
+			}
+#if LIBIOSEXEC_PREFIXED_ROOT
+			char *interp = interpargv[0];
+			if (strncmp(interp, "/noredirect", strlen("/noredirect")) == 0) {
+				memmove(interp, interp + strlen("/noredirect"), (strlen(interp) + 1) - strlen("/noredirect"));
+			} else if (strncmp(interp, "/bin", 4) == 0 || strncmp(interp, "/usr/bin", 8) == 0) {
+				char *newinterp = calloc(strlen(interp) + strlen(SHEBANG_REDIRECT_PATH) + 1, 1);
+				strcat(strcat(newinterp, SHEBANG_REDIRECT_PATH), interp);
+				free(interp);
+				interpargv[0] = newinterp;
+			}
+#endif
+		}
+	}
+
+	newargv = realloc(interpargv, (interpc + argc + 1) * sizeof(char *));
+	newargv[interpc + argc] = NULL;
+	for (int i = 0; i < argc; i++) {
+		newargv[interpc + i] = strdup(argv[i]);
+	}
+
+finish:
+	close(fd);
+	return newargv;
 }
 
-char** get_new_argv(const char* path, char* const argv[]) {
-    char* first_line = NULL;
-    size_t read_amount = 0;
-
-    FILE* ptr = fopen(path, "r");
-    if (!ptr) {
-        errno = ENOENT;
-        return NULL;
-    }
-
-    // If the line cannot be retrieved/is empty set errno to ENOEXEC
-    if (getline(&first_line, &read_amount, ptr) == 0) {
-        errno = ENOEXEC;
-        return NULL;
-    }
-
-    size_t first_line_len = strlen(first_line);
-
-    // If the line has a CRLF terminator, just move the length back by one and let the code
-    // below cut both off.
-    if (first_line[first_line_len - 2] == '\r') {
-        first_line_len--;
-    }
-
-    // Strip the newline off the end of the string.
-    first_line[first_line_len - 1] = '\0';
-    first_line_len--;
-
-    if (has_non_printable_char(first_line, first_line_len)) {
-        errno = ENOEXEC;
-        return NULL;
-    }
-
-    bool hasBang = 1;
-
-    if (strncmp("#!", first_line, 2)) {
-        hasBang = 0;
-    }
-
-    char** argv_new = calloc(1024, 1);
-    if (!argv_new) {
-        errno = ENOMEM;
-        return NULL;
-    }
-
-    int offset = 0;
-    char* freeme = first_line;
-
-    if (hasBang) {
-        // Remove the shebang from the line, for parsing.
-        first_line += 2;
-
-        char* state;
-        char* token = strtok_r(first_line, " ", &state);
-        char* interp = deduplicate_path_seperators(token);
-        char* arg_to_interpreter = strtok_r(NULL, "", &state);
-
-#if LIBIOSEXEC_PREFIXED_ROOT==1
-        if (strncmp(interp, "/noredirect", strlen("/noredirect"))) {
-            if (!strncmp(interp, "/bin", strlen("/bin")) || !strncmp(interp, "/usr/bin", strlen("/usr/bin"))) {
-                char* interp_redirected = calloc(strlen(interp) + strlen(SHEBANG_REDIRECT_PATH) + 1, 1);
-                strcat(strcat(interp_redirected, SHEBANG_REDIRECT_PATH), interp);
-                argv_new[0] = interp_redirected;
-            }
-
-            else {
-                argv_new[0] = strdup(interp);
-            }
-        }
-
-        else {
-            argv_new[0] = strdup(interp + strlen("/noredirect"));
-        }
-#else
-        argv_new[0] = interp;
-#endif
-        if (arg_to_interpreter != NULL) {
-            argv_new[1] = strdup(arg_to_interpreter);
-            offset++;
-        }
-#if LIBIOSEXEC_PREFIXED_ROOT==1
-        free(interp);
-#endif
-    } else {
-#if LIBIOSEXEC_PREFIXED_ROOT==1
-        char* default_interp = calloc(strlen(SHEBANG_REDIRECT_PATH) + strlen(DEFAULT_INTERPRETER) + 1, 1);
-        strcat(strcat(default_interp, SHEBANG_REDIRECT_PATH), DEFAULT_INTERPRETER);
-#else
-        char* default_interp = strdup(DEFAULT_INTERPRETER);
-#endif
-        argv_new[0] = default_interp;
-    }
-
-    size_t argcount = 0;
-    while(argv[argcount]) argcount++;
-
-    argv_new[1 + offset] = strdup(path);
-
-    for (int i = 1; i < argcount; i++) {
-        argv_new[offset + i + 1] = strdup(argv[i]);
-    }
-    argv_new[offset + argcount + 1] = NULL;
-
-    free(freeme);
-    return argv_new;
-}
 
 void free_new_argv(char** argv) {
-    for(int i = 0; argv[i] != NULL; i++) {
-        free(argv[i]);
-    }
-
-    free(argv);
+	for (int i = 0; argv[i] != NULL; i++) {
+		free(argv[i]);
+		argv[i] = NULL;
+	}
+	free(argv);
 }
