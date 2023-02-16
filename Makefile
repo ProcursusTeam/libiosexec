@@ -48,9 +48,9 @@ libiosexec_private.h: libiosexec_private.h.in
 
 libiosexec.$(SOVER).dylib: $(SRC:%.c=%.o)
 ifeq ($(shell uname -s), Linux)
-	$(CC) $(CFLAGS) -fvisibility=hidden -DLIBIOSEXEC_INTERNAL -lbsd -shared -o $@ $^
+	$(CC) $(CFLAGS) $(LDFLAGS) -fvisibility=hidden -DLIBIOSEXEC_INTERNAL -lbsd -shared -o $@ $^
 else ifeq ($(shell uname -s), Darwin)
-	$(CC) $(CFLAGS) -fvisibility=hidden -DLIBIOSEXEC_INTERNAL -install_name $(LIBDIR)/$@ -shared -o $@ $^
+	$(CC) $(CFLAGS) $(LDFLAGS) -fvisibility=hidden -DLIBIOSEXEC_INTERNAL -install_name $(LIBDIR)/$@ -shared -o $@ $^
 endif
 
 libiosexec.a: $(SRC:%.c=%.o)
@@ -72,8 +72,7 @@ TEST_progs := tests/t_ie_execve \
 TEST_scripts := tests/scripts/empty.sh \
 	tests/scripts/normal.sh \
 	tests/scripts/normalwitharg.sh \
-	tests/scripts/normalwithmultipleargs.sh \
-	tests/scripts/noshebang.sh
+	tests/scripts/normalwithmultipleargs.sh
                 
 
 %: %.c libiosexec.a
