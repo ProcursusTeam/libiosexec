@@ -13,9 +13,9 @@ main(int argc, char **argv)
 {
 	int err;
 	if (argc != 2)
-		exit(1);
+		return errno;
 
 	err = ie_execl(argv[1], argv[1], NULL, environ);
 	fprintf(stderr, "ie_execle: %s\n", strerror(errno));
-	exit(1);
+	return errno;
 }

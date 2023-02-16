@@ -14,11 +14,11 @@ main(int argc, char **argv)
 {
 	int err;
 	if (argc != 2)
-		exit(1);
+		return errno;
 
 	char *args[2] = { basename(argv[1]), NULL };
 
 	err = ie_execvpe(args[0], args, environ);
 	fprintf(stderr, "ie_execvpe: %s\n", strerror(errno));
-	exit(1);
+	return errno;
 }

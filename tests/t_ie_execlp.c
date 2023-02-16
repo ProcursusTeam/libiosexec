@@ -12,11 +12,11 @@ main(int argc, char **argv)
 {
 	int err;
 	if (argc != 2)
-		exit(1);
+		return errno;
 
 	char *arg = basename(argv[1]);
 
 	err = ie_execlp(arg, arg, NULL);
 	fprintf(stderr, "ie_execlp: %s\n", strerror(errno));
-	exit(1);
+	return errno;
 }
