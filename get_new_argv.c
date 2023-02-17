@@ -98,7 +98,9 @@ get_new_argv(const char *path, char *const argv[])
 
 	newargv = realloc(interpargv, (interpc + argc + 1) * sizeof(char *));
 	newargv[interpc + argc] = NULL;
-	for (int i = 0; i < argc; i++) {
+	/* i = 1 to avoid old argv[0] being passed to interpreter */
+        newargv[interpc] = strdup(path);
+	for (int i = 1; i < argc; i++) {
 		newargv[interpc + i] = strdup(argv[i]);
 	}
 
