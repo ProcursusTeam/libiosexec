@@ -15,7 +15,7 @@ ie_endusershell(void)
 }
 
 void
-setusershell(void)
+ie_setusershell(void)
 {
 	setusershell();
 }
