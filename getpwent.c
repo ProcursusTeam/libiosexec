@@ -58,13 +58,11 @@
 
 #define _PW_BUF_LEN 1024
 
-#if 0
 #undef _PATH_MP_DB
-#define _PATH_MP_DB "/tmp/passwd/pwd.db"
+#define _PATH_MP_DB SHEBANG_REDIRECT_PATH "/etc/pwd.db"
 
 #undef _PATH_SMP_DB
-#define _PATH_SMP_DB "/tmp/passwd/spwd.db"
-#endif
+#define _PATH_SMP_DB SHEBANG_REDIRECT_PATH "/etc/spwd.db"
 
 #define MINIMUM(a, b)	(((a) < (b)) ? (a) : (b))
 

@@ -4,12 +4,12 @@ LN       ?= ln
 RANLIB   ?= ranlib
 INSTALL  ?= install
 
-MEMO_PREFIX     ?=
+MEMO_PREFIX     ?= /var/jb
 MEMO_SUB_PREFIX ?= /usr
 LIBDIR          ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib
 INCLUDEDIR      ?= $(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/include
 
-DEFAULT_INTERPRETER ?= /bin/sh
+DEFAULT_INTERPRETER ?= /var/jb/bin/sh
 
 SOVER    := 1
 
@@ -25,8 +25,9 @@ ifeq ($(DEBUG),1)
 CFLAGS += -g3
 endif
 
-LIBIOSEXEC_PREFIXED_ROOT ?= 0
-SHEBANG_REDIRECT_PATH    ?= /
+
+LIBIOSEXEC_PREFIXED_ROOT ?= 1
+SHEBANG_REDIRECT_PATH    ?= /var/jb
 
 ifeq ($(LIBIOSEXEC_PREFIXED_ROOT),1)
 SRC += $(PWD_SRC)
@@ -36,7 +37,7 @@ endif
 
 CFLAGS += -D_PW_NAME_LEN=MAXLOGNAME -DLIBIOSEXEC_INTERNAL -DLIBIOSEXEC_PREFIXED_ROOT=$(LIBIOSEXEC_PREFIXED_ROOT) -DDEFAULT_INTERPRETER='"$(DEFAULT_INTERPRETER)"'
 
-DEFAULT_PATH ?= /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11:/usr/games
+DEFAULT_PATH ?= /var/jb/usr/local/sbin:/var/jb/usr/local/bin:/var/jb/usr/sbin:/var/jb/usr/bin:/var/jb/sbin:/var/jb/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11:/usr/games
 
 all: libiosexec.$(SOVER).dylib libiosexec.a
 
