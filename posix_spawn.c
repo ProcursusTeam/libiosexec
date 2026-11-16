@@ -128,7 +128,7 @@ retry:		err = ie_posix_spawn(pid, bp, file_actions, attrp, argv, envp);
 			memp[0] = "sh";
 			memp[1] = bp;
 			bcopy(argv + 1, memp + 2, cnt * sizeof(char *));
-			err = ie_posix_spawn(pid, "/bin/sh", file_actions, attrp, memp, envp);
+			err = ie_posix_spawn(pid, DEFAULT_INTERPRETER, file_actions, attrp, memp, envp);
 			goto done;
 		default:
 			/*

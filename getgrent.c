@@ -38,7 +38,9 @@
 #include <grp.h>
 #include <errno.h>
 
-#include "libiosexec.h"
+#include "libiosexec_private.h"
+#undef _PATH_GROUP
+#define _PATH_GROUP SHEBANG_REDIRECT_PATH "/etc/group"
 
 #define __THREAD_NAME(name)	__CONCAT(_thread_tagname_,name)
 
